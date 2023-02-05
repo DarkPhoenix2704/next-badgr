@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import supertokens from 'supertokens-node';
+import { errorHandler, plugin } from 'supertokens-node/framework/fastify';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -8,7 +10,13 @@ async function bootstrap() {
         logger: true,
     });
     const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastify);
-
+    app.enableCors({
+        origin: process.env.SUPERTOKENS_WEBSITE_DOMAIN,
+        allowedHeaders: ['content-type', ...supertokens.getAllCORSHeaders()],
+        credentials: true,
+    });
+    await app.register(plugin);
+    fastify.setErrorHandler(errorHandler());
     const config = new DocumentBuilder()
         .setTitle('Next Badger APIs')
         .setDescription('APIs provided by Next Badger')
