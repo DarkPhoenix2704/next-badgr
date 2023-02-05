@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String                  @unique
+  authid          String          
+  email           String                  @unique @id
+  name            String?
+  avatar          String?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  organizations   Organization[]
+  membership      Member[]                @relation("membership")
+  invitedMembers  Member[]                @relation("inviter")
+}
+
+model Organization {
+  id              String                  @id @default(cuid())
+  name            String
+  slug            String                  @unique
+  avatar          String?
+  inviteCode      String                  @unique @default(cuid())
+  creatorId       String
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  members         Member[]
+  creator         User                    @relation(fields: [creatorId], references: [id])
+}
+
+model Member {
+  id              String                  @id @default(cuid())
+  organisationId  String
+  email           String
+  inviter         String
+  invitedAt       DateTime                @default(now())
+  joinedAt        DateTime?
+
+
+  status          InvitationStatus        @default(PENDING)
+  role            MembershipRole          @default(MEMBER)
+
+  member          User?                   @relation(fields: [email], references: [email], name: "membership")
+  organisation    Organization            @relation(fields: [organisationId], references: [id])
+  invitedBy       User                    @relation(fields: [inviter], references: [id], name: "inviter")
+}
+
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum MembershipRole {
+  ADMIN
+  MEMBER
+}
