@@ -1,7 +1,8 @@
+import EmailPassword from 'supertokens-node/recipe/emailpassword';
 import { Inject, Injectable } from '@nestjs/common';
 import supertokens from 'supertokens-node';
 import Session from 'supertokens-node/recipe/session';
-import ThirdPartyEmailPassword from 'supertokens-node/recipe/thirdpartyemailpassword';
+import EmailVerification from 'supertokens-node/recipe/emailverification';
 import Dashboard from 'supertokens-node/recipe/dashboard';
 
 import { ConfigInjectionToken, AuthModuleConfig } from '../config.interface';
@@ -19,13 +20,23 @@ export class SupertokensService {
                 Dashboard.init({
                     apiKey: this.config.DashboardApiKey,
                 }),
-                ThirdPartyEmailPassword.init({
-                    providers: [
-                        ThirdPartyEmailPassword.Google({
-                            clientId: this.config.googleClientId,
-                            clientSecret: this.config.googleClientSecret,
+                EmailPassword.init(),
+                EmailVerification.init({
+                    mode: 'REQUIRED',
+                    emailDelivery: {
+                        override: (originalImplementation) => ({
+                            ...originalImplementation,
+                            sendEmail(input) {
+                                return originalImplementation.sendEmail({
+                                    ...input,
+                                    emailVerifyLink: input.emailVerifyLink.replace(
+                                        'http://localhost:3000/auth/verify-email?',
+                                        'http://localhost:3000/auth?verify-email=true&',
+                                    ),
+                                });
+                            },
                         }),
-                    ],
+                    },
                 }),
                 Session.init(),
             ],
