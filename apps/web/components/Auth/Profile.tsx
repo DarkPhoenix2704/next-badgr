@@ -1,14 +1,46 @@
+import api from '@app/api';
+import { useAuth } from '@app/hooks';
 import { ProfileSchema } from '@app/validators/Auth';
-import { Button, FormControl, FormErrorMessage, FormLabel, Input, VStack } from '@chakra-ui/react';
+import {
+    Button,
+    FormControl,
+    FormErrorMessage,
+    FormLabel,
+    Input,
+    useToast,
+    VStack,
+} from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { InferType } from 'yup';
+import { Toast } from '@app/components/Toast';
 
 type ProfileForm = InferType<typeof ProfileSchema>;
 
 const Profile = () => {
-    const saveProfile = async (data: ProfileForm) => {
-        console.log(data);
+    const { setUser } = useAuth();
+    const router = useRouter();
+    const toast = useToast();
+    const saveProfile = async (profileData: ProfileForm) => {
+        try {
+            const { data } = await api.post('/profile', profileData);
+            if (data.success) {
+                setUser(data.data);
+                router.push('/');
+            }
+        } catch (err) {
+            toast({
+                position: 'top-right',
+                render: () => (
+                    <Toast
+                        title="Error"
+                        description="Something went wrong. Please try again."
+                        status="error"
+                    />
+                ),
+            });
+        }
     };
     const {
         register: profileRegister,

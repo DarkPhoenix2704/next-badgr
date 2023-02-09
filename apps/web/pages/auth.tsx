@@ -62,12 +62,7 @@ const AuthPage: NextPageWithLayout = () => {
             >
                 <VStack gap="12px">
                     {Steps.map((step) => (
-                        <AuthCard
-                            key={step.step}
-                            title={step.title}
-                            isActive={step.step === Steps[progress].step}
-                            description={step.description}
-                        />
+                        <AuthCard key={step.step} step={step} progress={progress + 1} />
                     ))}
                 </VStack>
                 <AuthContainer>

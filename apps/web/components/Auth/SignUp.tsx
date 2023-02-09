@@ -1,10 +1,13 @@
 import {
     Button,
+    Center,
     Checkbox,
     FormControl,
     FormErrorMessage,
     FormLabel,
     Input,
+    Text,
+    Link,
     VStack,
 } from '@chakra-ui/react';
 
@@ -25,14 +28,10 @@ const SignUp = () => {
         mode: 'onSubmit',
         resolver: yupResolver(SignUpSchema),
     });
-    const { createAccount, setProgress } = useAuth();
+    const { createAccount } = useAuth();
 
     const signUp = async (data: SignUpForm) => {
-        const res = await createAccount(data.email, data.password);
-        // @ts-ignore
-        if (res.status === 'OK') {
-            setProgress(1);
-        }
+        await createAccount(data.email, data.password);
     };
     return (
         <form
@@ -130,6 +129,11 @@ const SignUp = () => {
                 >
                     Sign Up
                 </Button>
+                <Center width="100%">
+                    <Text textColor="white">
+                        Already have an account? <Link href="login">Login</Link>{' '}
+                    </Text>
+                </Center>
             </VStack>
         </form>
     );

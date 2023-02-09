@@ -25,24 +25,6 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
         <>
             <Head>
                 <title>Next Badgr</title>
-                <link rel="icon" type="image/x-icon" href="/images/logo.png" />
-                <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet" />
-                <style>
-                    {`
-                    * {
-                        font-family: 'Poppins', sans-serif;
-                    }
-            
-                    body {
-                        scrollbar-width: none;
-                    }
-                    ::-webkit-scrollbar {
-                        width: '0px';
-                        background: transparent;
-                        display: none;
-                    }
-                    `}
-                </style>
             </Head>
             <ChakraProvider theme={theme}>
                 <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
