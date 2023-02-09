@@ -9,7 +9,7 @@ datasource db {
 
 model User {
   id              String                  @unique
-  authid          String          
+  authid          String                  @unique
   email           String                  @unique @id
   name            String?
   avatar          String?
