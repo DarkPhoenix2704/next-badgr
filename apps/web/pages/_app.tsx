@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import { ChakraProvider } from '@chakra-ui/react';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import initAuth from '@app/auth';
 import { theme } from '@app/theme';
 import { AuthProvider } from '@app/contexts';
@@ -20,6 +21,7 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
     }
 
     const getLayout = Component.getLayout ?? ((page) => page);
+    const queryClient = new QueryClient();
 
     return (
         <>
@@ -27,7 +29,9 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
                 <title>Next Badgr</title>
             </Head>
             <ChakraProvider theme={theme}>
-                <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
+                <QueryClientProvider client={queryClient}>
+                    <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
+                </QueryClientProvider>
             </ChakraProvider>
         </>
     );

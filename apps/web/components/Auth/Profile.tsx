@@ -1,5 +1,4 @@
-import api from '@app/api';
-import { useAuth } from '@app/hooks';
+import { useAuth, useCreateProfile } from '@app/hooks/Auth';
 import { ProfileSchema } from '@app/validators/Auth';
 import {
     Button,
@@ -15,6 +14,7 @@ import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { InferType } from 'yup';
 import { Toast } from '@app/components/Toast';
+import { User } from '@app/types';
 
 type ProfileForm = InferType<typeof ProfileSchema>;
 
@@ -22,13 +22,13 @@ const Profile = () => {
     const { setUser } = useAuth();
     const router = useRouter();
     const toast = useToast();
+    const { isLoading, mutateAsync } = useCreateProfile();
+
     const saveProfile = async (profileData: ProfileForm) => {
         try {
-            const { data } = await api.post('/profile', profileData);
-            if (data.success) {
-                setUser(data.data);
-                router.push('/');
-            }
+            const user = (await mutateAsync(profileData)) as User;
+            setUser(user);
+            router.push('/');
         } catch (err) {
             toast({
                 position: 'top-right',
@@ -45,7 +45,7 @@ const Profile = () => {
     const {
         register: profileRegister,
         handleSubmit: profileHandleSubmit,
-        formState: { errors: profileErrors, isSubmitting: profileIsSubmitting },
+        formState: { errors: profileErrors },
     } = useForm<ProfileForm>({
         mode: 'onSubmit',
         resolver: yupResolver(ProfileSchema),
@@ -59,7 +59,7 @@ const Profile = () => {
                         Full Name
                     </FormLabel>
                     <Input
-                        disabled={profileIsSubmitting}
+                        disabled={isLoading}
                         variant="solid"
                         background="#151418"
                         padding="15px"
@@ -79,7 +79,7 @@ const Profile = () => {
                         Email
                     </FormLabel>
                     <Input
-                        disabled={profileIsSubmitting}
+                        disabled={isLoading}
                         variant="solid"
                         background="#151418"
                         padding="15px"
@@ -99,7 +99,7 @@ const Profile = () => {
                         Slug
                     </FormLabel>
                     <Input
-                        disabled={profileIsSubmitting}
+                        disabled={isLoading}
                         variant="solid"
                         background="#151418"
                         padding="15px"
@@ -115,7 +115,7 @@ const Profile = () => {
                     </FormErrorMessage>
                 </FormControl>
                 <Button
-                    isLoading={profileIsSubmitting}
+                    isLoading={isLoading}
                     type="submit"
                     width="100%"
                     color="white"

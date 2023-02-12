@@ -9,13 +9,16 @@ import {
     Text,
     Link,
     VStack,
+    useToast,
 } from '@chakra-ui/react';
 
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SignUpSchema } from '@app/validators/Auth';
 import { InferType } from 'yup';
-import { useAuth } from '@app/hooks';
+import { useCreateAccount } from '@app/hooks/Auth';
+import { Loading } from '@app/components/Auth';
+import { Toast } from '@app/components/Toast';
 
 type SignUpForm = InferType<typeof SignUpSchema>;
 
@@ -23,17 +26,31 @@ const SignUp = () => {
     const {
         register: createAccountRegister,
         handleSubmit: createAccountHandleSubmit,
-        formState: { errors: createAccountErrors, isSubmitting: createAccountIsSubmitting },
+        formState: { errors: createAccountErrors },
     } = useForm<SignUpForm>({
         mode: 'onSubmit',
         resolver: yupResolver(SignUpSchema),
     });
-    const { createAccount } = useAuth();
+
+    const toast = useToast();
+    const { isLoading, mutateAsync } = useCreateAccount();
 
     const signUp = async (data: SignUpForm) => {
-        await createAccount(data.email, data.password);
+        try {
+            await mutateAsync({
+                email: data.email,
+                password: data.password,
+            });
+        } catch (err: any) {
+            toast({
+                position: 'top-right',
+                duration: 5000,
+                render: () => <Toast title="Error" description={err.message} status="error" />,
+            });
+        }
     };
-    return (
+
+    return !isLoading ? (
         <form
             onSubmit={createAccountHandleSubmit(signUp)}
             style={{
@@ -46,7 +63,7 @@ const SignUp = () => {
                         Email
                     </FormLabel>
                     <Input
-                        disabled={createAccountIsSubmitting}
+                        disabled={isLoading}
                         variant="solid"
                         background="#151418"
                         padding="15px"
@@ -66,7 +83,7 @@ const SignUp = () => {
                         Password
                     </FormLabel>
                     <Input
-                        disabled={createAccountIsSubmitting}
+                        disabled={isLoading}
                         variant="solid"
                         background="#151418"
                         padding="15px"
@@ -86,7 +103,7 @@ const SignUp = () => {
                         Confirm Password
                     </FormLabel>
                     <Input
-                        disabled={createAccountIsSubmitting}
+                        disabled={isLoading}
                         variant="solid"
                         background="#151418"
                         padding="15px"
@@ -104,14 +121,14 @@ const SignUp = () => {
                 <Checkbox
                     textColor="white"
                     fontSize="16px"
-                    disabled={createAccountIsSubmitting}
+                    disabled={isLoading}
                     iconColor="#432170"
                     {...createAccountRegister('accept')}
                 >
                     I agree to Privacy Policy
                 </Checkbox>
                 <Button
-                    isLoading={createAccountIsSubmitting}
+                    isLoading={isLoading}
                     type="submit"
                     width="100%"
                     color="white"
@@ -136,6 +153,8 @@ const SignUp = () => {
                 </Center>
             </VStack>
         </form>
+    ) : (
+        <Loading />
     );
 };
 export { SignUp };

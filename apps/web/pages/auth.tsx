@@ -2,12 +2,11 @@ import {
     AuthCard,
     AuthContainer,
     AuthHeader,
-    Loading,
     Profile,
     SignUp,
     VerifyEmail,
 } from '@app/components/Auth';
-import { useAuth } from '@app/hooks';
+import { useAuth } from '@app/hooks/Auth';
 import { AuthLayout } from '@app/layout';
 import { Flex, VStack } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
@@ -38,7 +37,7 @@ const Steps = [
 const AuthPage: NextPageWithLayout = () => {
     const router = useRouter();
 
-    const { progress, setProgress, isUserLoading } = useAuth();
+    const { progress, setProgress } = useAuth();
 
     useEffect(() => {
         if (router.query.verifyEmail === 'true') {
@@ -66,10 +65,9 @@ const AuthPage: NextPageWithLayout = () => {
                     ))}
                 </VStack>
                 <AuthContainer>
-                    {isUserLoading ? <Loading /> : null}
-                    {!isUserLoading && progress === 0 ? <SignUp /> : null}
-                    {!isUserLoading && progress === 1 ? <VerifyEmail /> : null}
-                    {!isUserLoading && progress === 2 ? <Profile /> : null}
+                    {progress === 0 ? <SignUp /> : null}
+                    {progress === 1 ? <VerifyEmail /> : null}
+                    {progress === 2 ? <Profile /> : null}
                 </AuthContainer>
             </Flex>
         </VStack>
