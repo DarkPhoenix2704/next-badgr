@@ -1,0 +1,1 @@
+export { useFetchProfile } from './useFetchProfile';

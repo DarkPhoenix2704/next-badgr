@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }: Child) => {
     useEffect(() => {
         const checkUser = async () => {
             setIsUserLoading(true);
+            await fetchUser();
             const session = await Session.doesSessionExist();
             if (session) {
                 setProgress(1);

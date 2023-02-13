@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import exclude from 'src/lib/exclude';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 
@@ -38,6 +40,41 @@ export class ProfileService {
         return this.Success({
             message: 'User created successfully',
             data: res,
+        });
+    }
+
+    async update(updateProfileDto: UpdateProfileDto) {
+        const res = await this.prismaService.user.update({
+            where: {
+                authid: updateProfileDto.authid,
+            },
+            data: updateProfileDto,
+        });
+        return this.Success({
+            message: 'User updated successfully',
+            data: res,
+        });
+    }
+
+    async getBySlug(slug: string) {
+        const data = await this.prismaService.user.findFirst({
+            where: {
+                id: {
+                    equals: slug,
+                    mode: 'insensitive',
+                },
+            },
+        });
+        if (!data) {
+            return this.Success({
+                message: 'User not found',
+            });
+        }
+        exclude(data, ['authid', 'createdAt', 'updatedAt', 'email']);
+
+        return this.Success({
+            message: 'User read successfully',
+            data,
         });
     }
 }
